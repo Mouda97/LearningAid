@@ -29,13 +29,20 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
+            $user = Auth::user(); // Récupère l'utilisateur connecté
+            if ($user->role === 'administrateur') {
+                return redirect('/dashboardAdmin'); // Redirige l'admin
+            }else{
+                return redirect('/dashboard_user'); // Redirige l'étudiant
 
-            return redirect()->intended('/');
+            }
+            //return redirect()->intended('/');
         }
 
         return back()->withErrors([
             'email' => 'Les informations d\'identification fournies ne correspondent pas à nos enregistrements.',
         ])->onlyInput('email');
+        //
     }
 
     /**

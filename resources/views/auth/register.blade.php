@@ -1,3 +1,9 @@
+<?php 
+$name = "";
+$email = "";
+$password = "";
+$password_confirmation ="";
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -26,7 +32,7 @@
                     @csrf
                     <div>
                         <label for="name" class="block text-sm font-medium">Nom</label>
-                        <input type="text" id="name" name="name" class="mt-1 block w-full text-black rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                        <input type="text" id="name" name="name" value="<?= $name; ?>" class="mt-1 block w-full text-black rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                         @error('name')
                          <p class="text-red-500 text-xs italic">{{ $message }}</p>
                         @enderror
