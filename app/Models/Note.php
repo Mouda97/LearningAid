@@ -15,10 +15,10 @@ class Note extends Model
     protected $fillable = [
         'title',
         'content',
-        'user_id',
-        'statut	',
+        // 'user_id',
+        'statut',
         'niveau_visibilite',
-        'matiere', 
+        'matiere'
     ];
 
    

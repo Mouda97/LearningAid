@@ -16,7 +16,6 @@ return new class extends Migration
                 $table->id();
                 $table->string('title');
                 $table->text('content');
-                $table->string('matiere_id');
                 $table->enum('statut', ['brouillon', 'publiee', 'archivee', 'en_transformation'])->default('brouillon');
                 $table->enum('niveau_visibilite', ['prive', 'groupe', 'public'])->default('prive');
                 $table->foreignId('user_id')->constrained()->onDelete('cascade');

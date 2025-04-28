@@ -80,7 +80,7 @@
                         <div class="absolute left-0 top-0 h-full w-1 bg-blue-700"></div>
                         <a href="#" class="block pl-8 py-2 text-sm font-semibold text-blue-700">Tableau de bord</a>
                     </div>
-                    <a href="#" class="block pl-8 py-3 text-sm text-gray-700">Mes notes</a>
+                    <a href="{{route('notes.index')}}" class="block pl-8 py-3 text-sm text-gray-700">Mes notes</a>
                     <a href="#" class="block pl-8 py-3 text-sm text-gray-700">Quiz</a>
                     <a href="#" class="block pl-8 py-3 text-sm text-gray-700">Flashcards</a>
                     <a href="#" class="block pl-8 py-3 text-sm text-gray-700">Groupes d'étude</a>
