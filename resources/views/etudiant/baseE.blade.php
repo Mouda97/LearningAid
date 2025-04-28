@@ -76,11 +76,12 @@
             <!-- Menu latéral -->
             <aside class="hidden md:block w-60 bg-white border-r border-gray-200">
                 <nav class="mt-6">
-                    <div class="relative bg-blue-50 py-2">
-                        <div class="absolute left-0 top-0 h-full w-1 bg-blue-700"></div>
-                        <a href="#" class="block pl-8 py-2 text-sm font-semibold text-blue-700">Tableau de bord</a>
-                    </div>
-                    <a href="{{route('notes.index')}}" class="block pl-8 py-3 text-sm text-gray-700">Mes notes</a>
+                    <a href="/dashboard_user" class="block pl-8 py-3 text-sm {{ request()->is('dashboard_user') ? 'bg-blue-50 font-semibold text-blue-700 relative before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-blue-700' : 'text-gray-700' }}">
+                        Tableau de bord
+                    </a>
+                    <a href="{{ route('notes.index') }}" class="block pl-8 py-3 text-sm {{ request()->routeIs('notes.*') ? 'bg-blue-50 font-semibold text-blue-700 relative before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-blue-700' : 'text-gray-700' }}">
+                        Mes notes
+                    </a>
                     <a href="#" class="block pl-8 py-3 text-sm text-gray-700">Quiz</a>
                     <a href="#" class="block pl-8 py-3 text-sm text-gray-700">Flashcards</a>
                     <a href="#" class="block pl-8 py-3 text-sm text-gray-700">Groupes d'étude</a>

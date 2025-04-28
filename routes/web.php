@@ -25,7 +25,7 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/dashboard_user', function () {
     return view('etudiant/dashboard_user'); // interface d'acceuil de  l'étudiant
-})->middleware('auth');
+})->middleware('auth')->name('dashboard_user');
 
 Route::get('/dashboardAdmin', function () {
     return view('admin/dashboardAdmin'); // Tableau de bord admin
