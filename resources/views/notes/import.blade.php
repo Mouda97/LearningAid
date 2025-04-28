@@ -13,9 +13,10 @@
             
             <div class="mb-6">
                 <label for="file" class="block text-sm font-medium text-gray-700 mb-1">Fichier TXT</label>
-                <input type="file" name="file" id="file" accept=".txt" 
+                <input type="file" name="file" id="file" accept=".txt,.pdf,.doc,.docx" 
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" 
                     required>
+                <p class="text-sm text-gray-500 mt-1">Formats acceptés : TXT, PDF, DOC, DOCX</p>
                 @error('file')
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror

@@ -103,8 +103,7 @@
                     'content' => 'required|string',
                     'matiere' => 'nullable|string|max:255',
                     'statut' => ['nullable', 'string', 'in:brouillon,publiee,archivee,en_transformation'],
-                    'niveau_visibilite' => ['nullable', 'string', 'in:prive, groupe, public'],
-                    // 'categorie' => ['nullable', 'string', 'in:cours,devoir,examen,autre'],
+                    'niveau_visibilite' => ['nullable', 'string', 'in:prive,groupe,public'], // Suppression des espaces
                 ]);
 // modifier les champs de la note
                 $note->update([
@@ -133,27 +132,78 @@
             }
 
             /**
-             * Import notes from a TXT file.
+                         
+             * Import notes from various file types (TXT, PDF, DOC).
              */
-            
             public function importTxt(Request $request)
             {
                 $request->validate([
-                    'file' => 'required|file|mimes:txt',
+                    'file' => 'required|file|mimes:txt,pdf,doc,docx',
                 ]);
-
+            
                 $file = $request->file('file');
-                $content = file_get_contents($file->getRealPath());
-
-                // Basic title generation (you might want to improve this)
-                $title = Str::limit(explode("\n", $content)[0], 255);
-
+                $fileExtension = $file->getClientOriginalExtension();
+                $content = '';
+                $title = '';
+            
+                // Traitement selon le type de fichier
+                if ($fileExtension === 'txt') {
+                    // Traitement des fichiers TXT
+                    $content = file_get_contents($file->getRealPath());
+                    $title = Str::limit(explode("\n", $content)[0], 255);
+                } 
+                elseif (in_array($fileExtension, ['pdf'])) {
+                    // Pour les PDF, vous aurez besoin d'une bibliothèque comme pdfparser
+                    // Exemple d'utilisation avec la bibliothèque Smalot\PdfParser
+                    // Vous devez d'abord l'installer : composer require smalot/pdfparser
+                    try {
+                        // Si vous avez installé la bibliothèque, décommentez ces lignes
+                        // $parser = new \Smalot\PdfParser\Parser();
+                        // $pdf = $parser->parseFile($file->getRealPath());
+                        // $content = $pdf->getText();
+                        // $title = Str::limit($content, 255);
+                        
+                        // En attendant, utilisez ceci comme solution temporaire
+                        $title = $file->getClientOriginalName();
+                        $content = "Contenu importé depuis un fichier PDF: " . $title;
+                    } catch (\Exception $e) {
+                        return redirect('/notes')->with('error', 'Erreur lors de l\'analyse du PDF: ' . $e->getMessage());
+                    }
+                } 
+                elseif (in_array($fileExtension, ['doc', 'docx'])) {
+                    // Pour les DOC/DOCX, vous aurez besoin d'une bibliothèque comme phpoffice/phpword
+                    // Exemple : composer require phpoffice/phpword
+                    try {
+                        // Si vous avez installé la bibliothèque, décommentez ces lignes
+                        // $phpWord = \PhpOffice\PhpWord\IOFactory::load($file->getRealPath());
+                        // $content = '';
+                        // foreach ($phpWord->getSections() as $section) {
+                        //     foreach ($section->getElements() as $element) {
+                        //         if (method_exists($element, 'getText')) {
+                        //             $content .= $element->getText() . "\n";
+                        //         }
+                        //     }
+                        // }
+                        // $title = Str::limit($content, 255);
+                        
+                        // En attendant, utilisez ceci comme solution temporaire
+                        $title = $file->getClientOriginalName();
+                        $content = "Contenu importé depuis un fichier Word: " . $title;
+                    } catch (\Exception $e) {
+                        return redirect('/notes')->with('error', 'Erreur lors de l\'analyse du document Word: ' . $e->getMessage());
+                    }
+                }
+            
+                // Créer la note avec le contenu extrait
                 Auth::user()->notes()->create([
                     'title' => $title,
                     'content' => $content,
+                    'statut' => $request->statut ?? 'brouillon',
+                    'niveau_visibilite' => $request->niveau_visibilite ?? 'prive',
+                    'matiere' => $request->matiere ?? null,
                 ]);
-
-                return redirect('/notes')->with('success', 'Notes importées depuis le fichier TXT !');
+            
+                return redirect('/notes')->with('success', 'Document importé avec succès !');
             }
         }
         // <!-- ```

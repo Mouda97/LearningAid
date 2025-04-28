@@ -51,6 +51,9 @@
                         <option value="groupe" {{ old('niveau_visibilite', $note->niveau_visibilite) == 'groupe' ? 'selected' : '' }}>Groupe</option>
                         <option value="public" {{ old('niveau_visibilite', $note->niveau_visibilite) == 'public' ? 'selected' : '' }}>Public</option>
                     </select>
+                    @error('niveau_visibilite')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
             
