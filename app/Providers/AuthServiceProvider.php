@@ -6,6 +6,7 @@ use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvid
 use Illuminate\Support\Facades\Gate;
 use App\Models\User;
 use App\Models\Quiz;
+use App\Models\Flashcard;
 use Illuminate\Support\Facades\Log; // Correction de la capitalisation ici
 
 class AuthServiceProvider extends ServiceProvider
@@ -46,5 +47,19 @@ class AuthServiceProvider extends ServiceProvider
             return true; // Pour déboguer, autoriser tout le monde
             // return $user->id === $quiz->user_id;
         });
+
+        $this->registerPolicies();
+
+    Gate::define('view-flashcard', function (User $user, Flashcard $flashcard) {
+        return $user->id === $flashcard->user_id;
+    });
+
+    Gate::define('update-flashcard', function (User $user, Flashcard $flashcard) {
+        return $user->id === $flashcard->user_id;
+    });
+
+    Gate::define('delete-flashcard', function (User $user, Flashcard $flashcard) {
+        return $user->id === $flashcard->user_id;
+    });
     }
  }

@@ -13,6 +13,8 @@ use App\Models\Note;
 use App\Models\Groupe;
 use App\Models\Message;
 use App\Models\Statistique;
+use App\Models\Quiz;
+use App\Models\Flashcard;
 
 class User extends Authenticatable
 {
@@ -61,19 +63,19 @@ class User extends Authenticatable
         return $this->hasMany(Note::class);
     }
     public function quizzes()
-{
-    return $this->hasMany(Quiz::class); // Assure-toi que le modèle Quiz existe
-}
+    {
+        return $this->hasMany(Quiz::class); // Assure-toi que le modèle Quiz existe
+    }
     // public function matieres()
     // {
     //     return $this->hasMany(::class);
     // }
     
-
-    
-    
-
-    
-
-    
+    /**
+     * Define the relationship with flashcards
+     */
+    public function flashcards()
+    {
+        return $this->hasMany(Flashcard::class);
+    }
 }

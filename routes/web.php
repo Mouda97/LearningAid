@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\QuizController;
+use App\Http\Controllers\FlashcardController;
+use App\Http\Controllers\CardController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -54,6 +56,7 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/index', function () {
     return redirect('/notes');
 });
+// routes pour la gestion des quiz
 Route::middleware(['auth'])->group(function () {
     Route::resource('quizzes', QuizController::class);
     Route::get('/quizzes/create', [QuizController::class, 'create'])->name('quizzes.create');
@@ -64,6 +67,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('quizzes/{quiz}/questions/{question}/edit', [QuizController::class, 'editQuestion'])->name('quizzes.questions.edit');
     Route::put('quizzes/{quiz}/questions/{question}', [QuizController::class, 'updateQuestion'])->name('quizzes.questions.update');
     Route::delete('quizzes/{quiz}/questions/{question}', [QuizController::class, 'destroyQuestion'])->name('quizzes.questions.destroy');
+});
+// routes pour la gestion des flashcards
+Route::middleware(['auth'])->group(function () {
+    Route::resource('flashcards', FlashcardController::class);
+// routes pour les cartes flash
+    Route::prefix('flashcards/{flashcard}')->group(function () {
+        Route::resource('cards', CardController::class)->except(['index']);
+    });
 });
 
 

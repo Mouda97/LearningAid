@@ -1,17 +1,11 @@
 @extends('etudiant.baseE')
 
 @section('content')
-<div class="container mx-auto px-4 py-8 max-w-4xl">
+<div class="container mx-auto px-4 py-8">
     <div class="flex justify-between items-center mb-6">
-        <div>
-            <h1 class="text-3xl font-bold text-gray-800">Mes Quiz</h1>
-            <p class="text-gray-600">Gérez vos quiz et évaluations</p>
-        </div>
-        <a href="{{ route('quizzes.create') }}" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
-            </svg>
-            Créer un quiz
+        <h1 class="text-3xl font-bold text-gray-800">Mes Quiz</h1>
+        <a href="{{ route('quizzes.create') }}" class="bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded-lg transition">
+            + Créer un Quiz
         </a>
     </div>
 
@@ -21,68 +15,135 @@
     </div>
     @endif
 
-    @if(count($quizzes) > 0)
-    <div class="bg-white rounded-lg shadow-md overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Titre</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Questions</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Temps</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-                @foreach($quizzes as $quiz)
-                <tr>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm font-medium text-gray-900">{{ $quiz->title }}</div>
-                        <div class="text-sm text-gray-500">Créé le {{ $quiz->created_at->format('d/m/Y') }}</div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm text-gray-900">{{ $quiz->nombre_questions }} questions</div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm text-gray-900">{{ $quiz->temps_limite ? $quiz->temps_limite . ' min' : 'Illimité' }}</div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                            {{ $quiz->statut == 'publié' ? 'bg-green-100 text-green-800' : 
-                              ($quiz->statut == 'brouillon' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800') }}">
-                            {{ ucfirst($quiz->statut) }}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div class="flex space-x-2">
-                            <a href="{{ route('quizzes.show', $quiz) }}" class="text-blue-600 hover:text-blue-900">Voir</a>
-                            <a href="{{ route('quizzes.edit', $quiz) }}" class="text-indigo-600 hover:text-indigo-900">Modifier</a>
-                            <form action="{{ route('quizzes.destroy', $quiz) }}" method="POST" class="inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce quiz?')">Supprimer</button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
+    <!-- Filtres -->
+    <div class="flex space-x-2 mb-6">
+        <button class="px-4 py-2 bg-gray-100 rounded-full text-gray-700 font-medium hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 active">
+            Tous
+        </button>
+        <button class="px-4 py-2 bg-gray-100 rounded-full text-gray-700 font-medium hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            À faire
+        </button>
+        <button class="px-4 py-2 bg-gray-100 rounded-full text-gray-700 font-medium hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            Complétés
+        </button>
+    </div>
+
+    <!-- Liste des quiz -->
+    @if($quizzes->isEmpty())
+    <div class="bg-gray-100 rounded-lg p-8 text-center mb-8">
+        <p class="text-gray-600 text-lg">Vous n'avez pas encore de quiz. Commencez par en créer un !</p>
     </div>
     @else
-    <div class="bg-white rounded-lg shadow-md p-6 text-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">Aucun quiz trouvé</h3>
-        <p class="text-gray-500 mb-4">Vous n'avez pas encore créé de quiz. Commencez par en créer un nouveau.</p>
-        <a href="{{ route('quizzes.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-600 active:bg-blue-700 focus:outline-none focus:border-blue-700 focus:ring ring-blue-300 disabled:opacity-25 transition">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
-            </svg>
-            Créer un quiz
-        </a>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        @foreach($quizzes as $quiz)
+        <div class="rounded-lg shadow-md hover:shadow-lg transition overflow-hidden">
+            <div class="p-4 text-white
+                @if($loop->index % 3 == 0)
+                    bg-blue-500
+                @elseif($loop->index % 3 == 1)
+                    bg-blue-400
+                @else
+                    bg-blue-500
+                @endif
+            ">
+                <h2 class="text-xl font-semibold truncate">{{ $quiz->title }}</h2>
+            </div>
+            <div class="p-4 bg-white">
+                <p class="text-sm text-gray-600">{{ $quiz->description ?? 'Chapitre: ' . $quiz->chapter }}</p>
+                <p class="text-sm text-gray-600 mt-2">{{ $quiz->questions_count ?? 0 }} questions • {{ $quiz->time_limit ?? 15 }} minutes</p>
+                @if(isset($quiz->last_score))
+                <p class="text-sm text-blue-600 mt-2">Score précédent: {{ $quiz->last_score }}%</p>
+                @else
+                <p class="text-sm text-orange-500 mt-2">Nouveau</p>
+                @endif
+            </div>
+            <div class="bg-white px-5 py-3 flex justify-between border-t">
+                <div class="flex space-x-2">
+                    <a href="{{ route('quizzes.show', $quiz) }}" class="text-blue-500 hover:text-blue-700">
+                        <i class="fas fa-play mr-1"></i>Commencer
+                    </a>
+                    <a href="{{ route('quizzes.edit', $quiz) }}" class="text-yellow-500 hover:text-yellow-700">
+                        <i class="fas fa-edit mr-1"></i>Modifier
+                    </a>
+                    <form action="{{ route('quizzes.destroy', $quiz) }}" method="POST" class="inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce quiz?');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="text-red-500 hover:text-red-700">
+                            <i class="fas fa-trash mr-1"></i>Supprimer
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        @endforeach
+    </div>
+
+    <div class="mt-6">
+        {{ $quizzes->links() }}
     </div>
     @endif
+
+    <!-- Quiz suggérés par l'IA -->
+    <h2 class="text-xl font-bold text-gray-800 mb-4">Quiz suggérés par l'IA</h2>
+    <p class="text-sm text-gray-600 mb-4">Basés sur vos notes récentes</p>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="rounded-lg shadow-md hover:shadow-lg transition overflow-hidden">
+            <div class="p-4 text-white bg-orange-500">
+                <h3 class="text-lg font-semibold">Quiz IA: Biologie</h3>
+            </div>
+            <div class="p-4 bg-white">
+                <p class="text-sm text-gray-600">Génétique moléculaire</p>
+                <p class="text-sm text-gray-600 mt-2">10 questions • 15 min</p>
+                <p class="text-xs text-orange-500 mt-2">Généré aujourd'hui</p>
+            </div>
+        </div>
+        <div class="rounded-lg shadow-md hover:shadow-lg transition overflow-hidden">
+            <div class="p-4 text-white bg-orange-500">
+                <h3 class="text-lg font-semibold">Quiz IA: Économie</h3>
+            </div>
+            <div class="p-4 bg-white">
+                <p class="text-sm text-gray-600">Microéconomie</p>
+                <p class="text-sm text-gray-600 mt-2">12 questions • 15 min</p>
+                <p class="text-xs text-gray-500 mt-2">Généré hier</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quiz partagés -->
+    <h2 class="text-xl font-bold text-gray-800 mb-4">Quiz partagés avec moi</h2>
+    <p class="text-sm text-gray-600 mb-4">Par vos groupes d'étude</p>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="rounded-lg shadow-md hover:shadow-lg transition overflow-hidden">
+            <div class="p-4 text-white bg-blue-500">
+                <h3 class="text-lg font-semibold">Quiz: Informatique</h3>
+            </div>
+            <div class="p-4 bg-white">
+                <p class="text-sm text-gray-600">Structures de données</p>
+                <p class="text-sm text-gray-600 mt-2">15 questions • 20 min</p>
+                <p class="text-xs text-gray-500 mt-2">Partagé par: Marie D.</p>
+            </div>
+        </div>
+        <div class="rounded-lg shadow-md hover:shadow-lg transition overflow-hidden">
+            <div class="p-4 text-white bg-blue-500">
+                <h3 class="text-lg font-semibold">Quiz: Chimie</h3>
+            </div>
+            <div class="p-4 bg-white">
+                <p class="text-sm text-gray-600">Thermodynamique</p>
+                <p class="text-sm text-gray-600 mt-2">10 questions • 15 min</p>
+                <p class="text-xs text-gray-500 mt-2">Partagé par: Thomas L.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques -->
+    <h2 class="text-xl font-bold text-gray-800 mb-4">Statistiques de vos quiz</h2>
+    <div class="bg-white rounded-lg shadow-md p-5 border border-gray-200 mb-8">
+        <div class="h-40 w-full">
+            <!-- Ici vous pourriez intégrer un graphique réel avec Chart.js ou une autre bibliothèque -->
+            <div class="w-full h-full bg-gray-50 flex items-center justify-center">
+                <p class="text-gray-400">Graphique de progression des quiz</p>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection

@@ -83,7 +83,7 @@
                         Mes notes
                     </a>
                     <a href="{{ route('quizzes.index') }}" class="block pl-8 py-3 text-sm text-gray-700">Quiz</a>
-                    <a href="#" class="block pl-8 py-3 text-sm text-gray-700">Flashcards</a>
+                    <a href="{{ route('flashcards.index') }}" class="block pl-8 py-3 text-sm text-gray-700">Flashcards</a>
                     <a href="#" class="block pl-8 py-3 text-sm text-gray-700">Groupes d'étude</a>
                     <a href="#" class="block pl-8 py-3 text-sm text-gray-700">Messagerie</a>
                 </nav>
