@@ -60,6 +60,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Note::class);
     }
+    public function quizzes()
+{
+    return $this->hasMany(Quiz::class); // Assure-toi que le modèle Quiz existe
+}
     // public function matieres()
     // {
     //     return $this->hasMany(::class);

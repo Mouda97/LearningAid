@@ -5,7 +5,7 @@
     <!-- Titre et bienvenue -->
     <div class="mb-8">
         <h2 class="font-poppins font-bold text-2xl text-[#1767A4]">Tableau de bord</h2>
-        <p class="text-gray-700">Bienvenue, Manuella! Voici un aperçu de vos activités d'apprentissage.</p>
+        <p class="text-gray-700">Bienvenue, {{ Auth::user()->name }}! Voici un aperçu de vos activités d'apprentissage.</p>
     </div>
     
     <!-- Cartes statistiques -->
