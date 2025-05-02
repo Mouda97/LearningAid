@@ -34,10 +34,10 @@
             <div id="flashcard-container" class="relative">
                 <div id="card" class="w-full h-64 bg-blue-50 rounded-xl shadow-md cursor-pointer transition-transform duration-700 transform-style-3d">
                     <div id="front" class="absolute inset-0 backface-hidden flex items-center justify-center p-6 text-center">
-                        <p class="text-xl font-medium text-gray-800">Cliquez sur la carte pour voir la réponse</p>
+                        <p class="text-xl font-medium text-gray-800" id="front-content">Question</p>
                     </div>
                     <div id="back" class="absolute inset-0 backface-hidden flex items-center justify-center p-6 text-center rotate-y-180">
-                        <p class="text-xl font-medium text-gray-800">La réponse apparaîtra ici</p>
+                        <p class="text-xl font-medium text-gray-800" id="back-content">Réponse</p>
                     </div>
                 </div>
             </div>
@@ -68,11 +68,11 @@
                         <div class="p-4">
                             <div class="mb-3">
                                 <h4 class="text-sm font-medium text-gray-500 mb-1">Question</h4>
-                                <p class="text-gray-800">{{ $card->question }}</p>
+                                <p class="text-gray-800">{{ $card->front }}</p>
                             </div>
                             <div>
                                 <h4 class="text-sm font-medium text-gray-500 mb-1">Réponse</h4>
-                                <p class="text-gray-800">{{ $card->answer }}</p>
+                                <p class="text-gray-800">{{ $card->back }}</p>
                             </div>
                         </div>
                     </div>
@@ -145,8 +145,8 @@
         // Mettre à jour l'affichage de la carte
         function updateCardDisplay() {
             if (cards.length === 0) {
-                frontEl.innerHTML = '<p class="text-xl font-medium text-gray-800">Aucune carte disponible</p>';
-                backEl.innerHTML = '<p class="text-xl font-medium text-gray-800">Ajoutez des cartes pour commencer</p>';
+                document.getElementById('front-content').textContent = 'Aucune carte disponible';
+                document.getElementById('back-content').textContent = 'Ajoutez des cartes pour commencer';
                 prevBtn.disabled = true;
                 nextBtn.disabled = true;
                 currentCardEl.textContent = '0';
@@ -155,8 +155,8 @@
             }
             
             const currentCard = cards[currentIndex];
-            frontEl.innerHTML = `<p class="text-xl font-medium text-gray-800">${currentCard.question}</p>`;
-            backEl.innerHTML = `<p class="text-xl font-medium text-gray-800">${currentCard.answer}</p>`;
+            document.getElementById('front-content').textContent = currentCard.front;
+            document.getElementById('back-content').textContent = currentCard.back;
             
             prevBtn.disabled = currentIndex === 0;
             nextBtn.disabled = currentIndex === cards.length - 1;
