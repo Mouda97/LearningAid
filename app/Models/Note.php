@@ -1,34 +1,37 @@
 <?php
 
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\User;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Note extends Model
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory;
-
-    protected $table = 'notes';
 
     protected $fillable = [
         'title',
         'content',
-        // 'user_id',
+        'matiere',
         'statut',
         'niveau_visibilite',
-        'matiere'
+        'user_id',
     ];
 
-   
-
-    public function user()
+    /**
+     * Get the user that owns this note.
+     */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    
+    // Removing the incorrect note relationship
+    // If you need a relationship to Matiere model, it should be:
+    // public function matiere(): BelongsTo
+    // {
+    //     return $this->belongsTo(Matiere::class);
+    // }
 }
-//
 

@@ -60,7 +60,8 @@ class FlashcardController extends Controller
         if ($flashcard->user_id !== Auth::id()) {
             abort(403, 'Unauthorized');
         }
-
+        // Charger les cartes associées
+        $flashcard->load('cards'); // Ou utiliser ->with('cards') dans la requête initiale
         return view('flashcards.show', compact('flashcard'));
     }
 

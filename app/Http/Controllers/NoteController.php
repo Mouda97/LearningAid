@@ -5,6 +5,9 @@
         use Illuminate\Http\Request;
         use Illuminate\Support\Facades\Auth;
         use Illuminate\Support\Str;
+        use Illuminate\Support\Facades\DB;
+        use Illuminate\Support\Facades\Log;
+        
 
         class NoteController extends Controller
         {
@@ -13,8 +16,41 @@
              */
             public function index()
             {
-                $notes = Auth::user()->notes()->latest()->paginate(10); // Récupère les notes de l'utilisateur connecté, les plus récentes en premier, paginées
-                return view('notes.index', compact('notes'));
+                try {
+                    // Make sure we're getting the latest notes
+                    $notes = Auth::user()->notes()->latest()->paginate(10);
+                    
+                    // Debug the notes to see what's being returned
+                    \Log::info('Notes retrieved: ' . $notes->count());
+                    
+                    // Récupérer les matières avec le nombre de notes pour chacune
+                    $matieres = DB::table('notes')
+                        ->select('matiere', DB::raw('count(*) as notes_count'), DB::raw('MAX(updated_at) as derniere_modif'))
+                        ->where('user_id', Auth::id())
+                        ->groupBy('matiere')
+                        ->get()
+                        ->map(function($item) {
+                            $item->nom = $item->matiere;
+                            // Formater la date de dernière modification
+                            $date = new \Carbon\Carbon($item->derniere_modif);
+                            if ($date->isToday()) {
+                                $item->derniere_modif = "Aujourd'hui";
+                            } elseif ($date->isYesterday()) {
+                                $item->derniere_modif = "Hier";
+                            } else {
+                                $item->derniere_modif = "Il y a " . $date->diffInDays() . "j";
+                            }
+                            return $item;
+                        });
+                    
+                    return view('notes.index', compact('notes', 'matieres'));
+                } catch (\Exception $e) {
+                    \Log::error('Erreur dans NoteController@index: ' . $e->getMessage());
+                    return view('notes.index', [
+                        'notes' => collect([]),
+                        'error' => 'Une erreur est survenue lors du chargement des notes.'
+                    ]);
+                }
             }
 
             /**
@@ -30,32 +66,26 @@
              */
             public function store(Request $request)
             {
-                // $request->validate([
-                //     'title' => 'required|string|max:255',
-                //     'content' => 'required|string',
-                //     'matiere' => 'nullable|string|max:255',
-                //     'status' => 'nullable|enum|max:255',
-                //     'niveau_visibilite'=> 'nullable|enum|max:255'
-                // ]);
-                 // ]);'brouillon', 'publiee', 'archivee', 'en_transformation'
-                 $request->validate([
+                $request->validate([
                     'title' => 'required|string|max:255',
                     'content' => 'required|string',
                     'matiere' => 'nullable|string|max:255',
                     'statut' => ['nullable', 'string', 'in:brouillon,publiee,archivee,en_transformation'],
-                    'niveau_visibilite' => ['nullable', 'string', 'in:prive, groupe, public'],
-                    // 'categorie' => ['nullable', 'string', 'in:cours,devoir,examen,autre'],
+                    'niveau_visibilite' => ['nullable', 'string', 'in:prive,groupe,public'],
                 ]);
-
-
-                Auth::user()->notes()->create([
+            
+                // Vérifiez que tous les champs nécessaires sont présents dans la requête
+                $data = [
                     'title' => $request->title,
                     'content' => $request->content,
-                    'matiere' => $request->matiere,
-                    'statut' => $request->statut,
-                    'niveau_visibilite'=> $request->niveau_visibilite,
-                ]);
-
+                    'matiere' => $request->matiere ?? 'Non classé', // Valeur par défaut si matiere est null
+                    'statut' => $request->statut ?? 'brouillon',
+                    'niveau_visibilite' => $request->niveau_visibilite ?? 'prive',
+                ];
+            
+                // Créer la note avec les données validées
+                Auth::user()->notes()->create($data);
+            
                 return redirect('/notes')->with('success', 'Note créée avec succès !');
             }
 
