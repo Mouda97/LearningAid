@@ -82,8 +82,8 @@
                     <a href="{{ route('notes.index') }}" class="block pl-8 py-3 text-sm {{ request()->routeIs('notes.*') ? 'bg-blue-50 font-semibold text-blue-700 relative before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-blue-700' : 'text-gray-700' }}">
                         Mes notes
                     </a>
-                    <a href="{{ route('quizzes.index') }}" class="block pl-8 py-3 text-sm text-gray-700">Quiz</a>
-                    <a href="{{ route('flashcards.index') }}" class="block pl-8 py-3 text-sm text-gray-700">Flashcards</a>
+                    <a href="{{ route('quizzes.index') }}" class="block pl-8 py-3 text-sm {{ request()->routeIs('quizzes.*') ? 'bg-blue-50 font-semibold text-blue-700 relative before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-blue-700' : 'text-gray-700' }}">Quiz</a>
+                    <a href="{{ route('flashcards.index') }}" class="block pl-8 py-3 text-sm {{ request()->routeIs('flashcards.*') || request()->routeIs('reviews.*') ? 'bg-blue-50 font-semibold text-blue-700 relative before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-blue-700' : 'text-gray-700' }}">Flashcards</a>
                     <a href="#" class="block pl-8 py-3 text-sm text-gray-700">Groupes d'étude</a>
                     <a href="#" class="block pl-8 py-3 text-sm text-gray-700">Messagerie</a>
                 </nav>

@@ -6,6 +6,7 @@ use App\Http\Controllers\NoteController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\FlashcardController;
 use App\Http\Controllers\CardController;
+use App\Http\Controllers\ReviewController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -74,6 +75,11 @@ Route::middleware(['auth'])->group(function () {
 // routes pour les cartes flash
     Route::prefix('flashcards/{flashcard}')->group(function () {
         Route::resource('cards', CardController::class)->except(['index']);
+    });
+    // Routes pour la révision des flashcards
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/review/deck/{flashcard}', [ReviewController::class, 'reviewDeck'])->name('reviews.deck');
+        Route::post('/review/process/{card}', [ReviewController::class, 'processReview'])->name('reviews.process');
     });
 });
 
