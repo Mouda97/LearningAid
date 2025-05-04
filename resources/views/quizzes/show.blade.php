@@ -1,75 +1,111 @@
 @extends('etudiant.baseE')
+
 @section('content')
-<div class="container mx-auto p-4">
-    <div class="bg-white shadow-md rounded-lg overflow-hidden">
-        <div class="p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h1 class="text-2xl font-bold text-gray-800">{{ $quiz->title }}</h1>
-                <span class="px-3 py-1 rounded-full text-sm font-semibold 
-                    {{ $quiz->statut == 'publié' ? 'bg-green-100 text-green-800' : 
-                      ($quiz->statut == 'brouillon' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800') }}">
-                    {{ ucfirst($quiz->statut) }}
-                </span>
-            </div>
-            
-            <p class="text-gray-600 mb-4">{{ $quiz->description }}</p>
-            
-            <div class="grid grid-cols-2 gap-4 mb-6">
-                <div class="bg-gray-50 p-3 rounded">
-                    <p class="text-sm text-gray-500">Nombre de questions</p>
-                    <p class="text-lg font-semibold">{{ $quiz->nombre_questions }}</p>
-                </div>
-                <div class="bg-gray-50 p-3 rounded">
-                    <p class="text-sm text-gray-500">Temps limite</p>
-                    <p class="text-lg font-semibold">{{ $quiz->temps_limite ? $quiz->temps_limite . ' minutes' : 'Illimité' }}</p>
-                </div>
-            </div>
-            
-            <div class="flex space-x-2 mb-8">
-                <a href="{{ route('quizzes.edit', $quiz) }}" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Modifier</a>
-                <a href="{{ route('quizzes.questions.create', $quiz) }}" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Ajouter une question</a>
-                <form action="{{ route('quizzes.destroy', $quiz) }}" method="POST" class="inline">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce quiz?')">Supprimer</button>
-                </form>
-            </div>
-            
-            <h2 class="text-xl font-semibold mb-4">Questions</h2>
-            
-            @if($quiz->questions->count() > 0)
-                <div class="space-y-4">
-                    @foreach($quiz->questions as $index => $question)
-                    <div class="border rounded-lg p-4">
-                        <div class="flex justify-between">
-                            <h3 class="font-medium">Question {{ $index + 1 }}</h3>
-                            <div class="flex space-x-2">
-                                <a href="{{ route('quizzes.questions.edit', [$quiz, $question]) }}" class="text-blue-500 hover:text-blue-700">Modifier</a>
-                                <form action="{{ route('quizzes.questions.destroy', [$quiz, $question]) }}" method="POST" class="inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-500 hover:text-red-700" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette question?')">Supprimer</button>
-                                </form>
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">{{ $quiz->title }}</h1>
+        <p class="text-gray-600">Créé le {{ $quiz->created_at->format('d/m/Y à H:i') }}</p>
+    </div>
+
+    @if(session('error'))
+        <div class="mb-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    <form action="{{ route('quizzes.submit', $quiz) }}" method="POST">
+        @csrf
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+            <div class="p-6">
+                @foreach($quiz->questions as $index => $question)
+                <div class="mb-8 pb-6 border-b border-gray-200 last:border-b-0 last:mb-0 last:pb-0">
+                    <h3 class="text-xl font-semibold mb-4">Question {{ $index + 1 }}: {{ $question->question_text }}</h3>
+                    
+                    {{-- Affichage différent selon le type de question --}}
+                    @if($question->type == 'choix_multiple')
+                        <div class="space-y-3">
+                            @php
+                                // Récupérer les options depuis incorrect_answers
+                                $incorrectAnswers = json_decode($question->incorrect_answers, true) ?? [];
+                                
+                                // S'assurer que incorrect_answers est un tableau
+                                if (!is_array($incorrectAnswers)) {
+                                    $incorrectAnswers = [];
+                                }
+                                
+                                // Combiner avec la réponse correcte
+                                $optionsArray = array_merge([$question->correct_answer], $incorrectAnswers);
+                                
+                                // Mélanger les options
+                                shuffle($optionsArray);
+                            @endphp
+                            
+                            @foreach($optionsArray as $option)
+                            <div class="flex items-center">
+                                <input type="radio" name="answers[{{ $question->id }}]" id="q{{ $question->id }}_{{ $loop->index }}" 
+                                    value="{{ $option }}" class="h-4 w-4 text-blue-600 focus:ring-blue-500">
+                                <label for="q{{ $question->id }}_{{ $loop->index }}" class="ml-3 block text-gray-700">
+                                    {{ $option }}
+                                </label>
+                            </div>
+                            @endforeach
+                        </div>
+                    
+                    @elseif($question->type == 'vrai_faux')
+                        <div class="space-y-3">
+                            <div class="flex items-center">
+                                <input type="radio" name="answers[{{ $question->id }}]" id="q{{ $question->id }}_true" 
+                                    value="Vrai" class="h-4 w-4 text-blue-600 focus:ring-blue-500">
+                                <label for="q{{ $question->id }}_true" class="ml-3 block text-gray-700">Vrai</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="radio" name="answers[{{ $question->id }}]" id="q{{ $question->id }}_false" 
+                                    value="Faux" class="h-4 w-4 text-blue-600 focus:ring-blue-500">
+                                <label for="q{{ $question->id }}_false" class="ml-3 block text-gray-700">Faux</label>
                             </div>
                         </div>
-                        <p class="mt-2">{{ $question->question_text }}</p>
-                        <div class="mt-2">
-                            <p class="text-sm text-gray-600">Réponse correcte: {{ $question->correct_answer }}</p>
+                    
+                    @elseif($question->type == 'reponse_court')
+                        <div class="mt-4">
+                            <label for="answer_{{ $question->id }}" class="block text-sm font-medium text-gray-700 mb-2">Votre réponse:</label>
+                            <textarea 
+                                id="answer_{{ $question->id }}" 
+                                name="answers[{{ $question->id }}]" 
+                                rows="4" 
+                                class="shadow-sm focus:ring-blue-500 focus:border-blue-500 mt-1 block w-full sm:text-sm border border-gray-300 rounded-md p-2"
+                                placeholder="Saisissez votre réponse ici..."
+                            ></textarea>
                         </div>
-                    </div>
-                    @endforeach
+                    
+                    @else
+                        {{-- Type par défaut (si le type n'est pas reconnu) --}}
+                        <div class="mt-4">
+                            <label for="answer_{{ $question->id }}" class="block text-sm font-medium text-gray-700 mb-2">Votre réponse:</label>
+                            <textarea 
+                                id="answer_{{ $question->id }}" 
+                                name="answers[{{ $question->id }}]" 
+                                rows="4" 
+                                class="shadow-sm focus:ring-blue-500 focus:border-blue-500 mt-1 block w-full sm:text-sm border border-gray-300 rounded-md p-2"
+                                placeholder="Saisissez votre réponse ici..."
+                            ></textarea>
+                        </div>
+                    @endif
                 </div>
-            @else
-                <div class="bg-gray-50 p-4 rounded text-center">
-                    <p class="text-gray-500">Aucune question n'a encore été ajoutée à ce quiz.</p>
-                    <a href="{{ route('quizzes.questions.create', $quiz) }}" class="mt-2 inline-block text-blue-500 hover:text-blue-700">Ajouter une question</a>
-                </div>
-            @endif
+                @endforeach
+            </div>
             
-            <div class="mt-6">
-                <a href="{{ route('quizzes.index') }}" class="text-blue-500 hover:text-blue-700">Retour à la liste des quiz</a>
+            <div class="bg-gray-50 px-6 py-4">
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                    Valider mes réponses
+                </button>
             </div>
         </div>
+    </form>
+
+    <div class="mt-6">
+        <a href="{{ route('quizzes.index') }}" class="text-blue-500 hover:text-blue-700">
+            <i class="fas fa-arrow-left mr-1"></i>Retour à la liste des quiz
+        </a>
     </div>
 </div>
 @endsection

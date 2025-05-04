@@ -133,7 +133,7 @@
         </a>
     </div>
 
-    <!-- Ajoutez ce formulaire là où vous avez le bouton pour générer le quiz -->
+    {{-- Dans la section où vous avez le formulaire pour générer un quiz --}}
     <form action="{{ route('notes.ai.generate.quiz', $note) }}" method="POST" class="mt-4">
         @csrf
         <div class="mb-3">
@@ -144,6 +144,16 @@
                 @endfor
             </select>
         </div>
+        
+        <div class="mb-3">
+            <label for="question_type" class="block text-sm font-medium text-gray-700 mb-1">Type de questions</label>
+            <select id="question_type" name="question_type" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                <option value="choix_multiple">Choix multiple</option>
+                <option value="vrai_faux">Vrai ou Faux</option>
+                <option value="reponse_court">Réponse courte</option>
+            </select>
+        </div>
+        
         <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150 disabled:opacity-50">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
             Générer Quiz IA

@@ -68,6 +68,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('quizzes/{quiz}/questions/{question}/edit', [QuizController::class, 'editQuestion'])->name('quizzes.questions.edit');
     Route::put('quizzes/{quiz}/questions/{question}', [QuizController::class, 'updateQuestion'])->name('quizzes.questions.update');
     Route::delete('quizzes/{quiz}/questions/{question}', [QuizController::class, 'destroyQuestion'])->name('quizzes.questions.destroy');
+    
+    // Route pour soumettre les réponses d'un quiz
+    Route::post('/quizzes/{quiz}/submit', [QuizController::class, 'submitQuiz'])->name('quizzes.submit');
+    
+    // Route pour afficher les résultats d'un quiz
+    Route::get('/quizzes/{quiz}/results', [QuizController::class, 'showResults'])->name('quizzes.results');
 });
 // routes pour la gestion des flashcards
 Route::middleware(['auth'])->group(function () {
@@ -90,5 +96,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/notes/{note}/generate-flashcards', [NoteController::class, 'generateFlashcards'])
           ->name('notes.ai.generate.flashcards');
 });
+
+// Dans le groupe de routes middleware(['auth'])
+Route::post('/quizzes/{quiz}/submit', [QuizController::class, 'submitQuiz'])->name('quizzes.submit');
 
 

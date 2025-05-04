@@ -208,5 +208,71 @@ class QuizController extends Controller
 
         return redirect()->route('quizzes.show', $quiz)->with('success', 'Question supprimée !');
     }
+
+    /**
+     * Traite les réponses soumises par l'utilisateur pour un quiz.
+     */
+    /**
+     * Traite les réponses soumises par l'utilisateur pour un quiz.
+     */
+    public function submitQuiz(Request $request, Quiz $quiz)
+    {
+        // Vérifier que l'utilisateur est autorisé à accéder à ce quiz
+        if ($quiz->user_id !== auth()->id()) {
+            abort(403, 'Action non autorisée.');
+        }
+    
+        // Vérifier que l'utilisateur a répondu à toutes les questions
+        if (!$request->has('answers') || count($request->answers) != $quiz->questions->count()) {
+            return redirect()->back()->with('error', 'Veuillez répondre à toutes les questions.');
+        }
+    
+        $userAnswers = $request->answers;
+        $results = [];
+        $score = 0;
+    
+        // Évaluer chaque réponse
+        foreach ($quiz->questions as $question) {
+            $userAnswer = $userAnswers[$question->id] ?? null;
+            $isCorrect = ($userAnswer === $question->correct_answer);
+            
+            if ($isCorrect) {
+                $score++;
+            }
+    
+            $results[$question->id] = [
+                'user_answer' => $userAnswer,
+                'correct' => $isCorrect
+            ];
+        }
+    
+        // Stocker les résultats en session pour les afficher
+        return redirect()->route('quizzes.results', $quiz)
+            ->with('results', $results)
+            ->with('score', $score);
+    }
+
+    /**
+     * Affiche les résultats d'un quiz.
+     */
+    public function showResults(Quiz $quiz)
+    {
+        // Vérifier que l'utilisateur est autorisé à accéder à ce quiz
+        if ($quiz->user_id !== auth()->id()) {
+            abort(403, 'Action non autorisée.');
+        }
+    
+        // Vérifier que les résultats sont disponibles en session
+        if (!session('results')) {
+            return redirect()->route('quizzes.show', $quiz)
+                ->with('error', 'Vous devez d\'abord compléter le quiz pour voir les résultats.');
+        }
+    
+        return view('quizzes.results', [
+            'quiz' => $quiz,
+            'results' => session('results'),
+            'score' => session('score')
+        ]);
+    }
 }
 
