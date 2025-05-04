@@ -81,6 +81,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/review/deck/{flashcard}', [ReviewController::class, 'reviewDeck'])->name('reviews.deck');
         Route::post('/review/process/{card}', [ReviewController::class, 'processReview'])->name('reviews.process');
     });
+
+    // Routes pour la Génération IA à partir des Notes
+    Route::post('/notes/{note}/generate-quiz', [NoteController::class, 'generateQuiz'])
+          ->name('notes.ai.generate.quiz');
+
+    Route::post('/notes/{note}/generate-flashcards', [NoteController::class, 'generateFlashcards'])
+          ->name('notes.ai.generate.flashcards');
 });
 
 

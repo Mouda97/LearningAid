@@ -10,15 +10,13 @@ class Question extends Model
     use HasFactory;
 
     protected $fillable = [
+        'quiz_id',
         'question_text',
-        'correct_answer',
-        'incorrect_answers',
-        'type',
-        'quiz_id'
-    ];
-
-    protected $casts = [
-        'incorrect_answers' => 'array',
+        'option_a',
+        'option_b',
+        'option_c',
+        'option_d',
+        'correct_answer'
     ];
 
     public function quiz()
