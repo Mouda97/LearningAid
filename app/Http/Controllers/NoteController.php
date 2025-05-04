@@ -13,6 +13,7 @@
         use App\Models\Quiz;
         use App\Models\Question;
         use \JsonException; // Correct import for JsonException
+        use App\Http\Controllers\QuizController;
 
         
 
@@ -268,13 +269,19 @@
                 }
 
                 $noteContent = $note->content;
-                // Instruction pour Gemini (on peut être plus direct)
-                // On demande explicitement du JSON.
-                $prompt = "Basé sur le texte suivant, génère un quiz de 3 questions à choix multiples (QCM).\n\n"
-                        . "FORMAT DE SORTIE ATTENDU :\n"
-                        . "Un unique bloc de code JSON valide contenant un objet avec une clé 'quiz_title' (string) et une clé 'questions' (tableau d'objets). Chaque objet question doit avoir les clés : 'question' (string), 'options' (objet avec clés A, B, C, D contenant les strings des réponses), et 'correct_answer' (string contenant la lettre A, B, C ou D de la bonne réponse).\n\n"
-                        . "TEXTE DE RÉFÉRENCE :\n"
-                        . $noteContent;
+                
+                // Valider et récupérer le nombre de questions (par défaut 3)
+                $numQuestions = request()->input('num_questions', 3);
+                
+                // Limiter le nombre entre 1 et 30
+                $numQuestions = max(1, min(30, (int)$numQuestions));
+                
+                // Préparer le prompt pour Gemini
+                $prompt = "Basé sur le texte suivant, génère un quiz de {$numQuestions} questions à choix multiples (QCM).\n\n"
+                    . "FORMAT DE SORTIE ATTENDU :\n"
+                    . "Un unique bloc de code JSON valide contenant un objet avec une clé 'quiz_title' (string) et une clé 'questions' (tableau d'objets). Chaque objet question doit avoir les clés : 'question' (string), 'options' (objet avec clés A, B, C, D contenant les strings des réponses), et 'correct_answer' (string contenant la lettre A, B, C ou D de la bonne réponse).\n\n"
+                    . "TEXTE DE RÉFÉRENCE :\n"
+                    . $noteContent;
 
                 // Modèle Gemini à utiliser (Flash est rapide et souvent suffisant)
                 $model = 'gemini-1.5-flash-latest'; // Ou 'gemini-1.5-pro-latest' pour plus de puissance

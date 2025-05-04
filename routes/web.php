@@ -83,7 +83,8 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Routes pour la Génération IA à partir des Notes
-    Route::post('/notes/{note}/generate-quiz', [NoteController::class, 'generateQuiz'])
+    // Route pour générer un quiz à partir d'une note
+    Route::post('/notes/{note}/ai/generate/quiz', [App\Http\Controllers\NoteController::class, 'generateQuiz'])
           ->name('notes.ai.generate.quiz');
 
     Route::post('/notes/{note}/generate-flashcards', [NoteController::class, 'generateFlashcards'])
