@@ -16,7 +16,7 @@ class UserController extends Controller
         $query = User::query();
         
         // Filtrage par recherche
-        if ($request->has('search')) {
+        if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
@@ -25,18 +25,18 @@ class UserController extends Controller
         }
         
         // Filtrage par type (rôle)
-        if ($request->has('role') && $request->role != 'Type') {
+        if ($request->filled('role')) {
             $query->where('role', $request->role);
         }
         
         // Filtrage par statut
-        if ($request->has('status') && $request->status != 'Statut') {
+        if ($request->filled('status')) {
             $isActive = $request->status === 'Actif';
             $query->where('is_active', $isActive);
         }
         
         // Tri par date
-        if ($request->has('date')) {
+        if ($request->filled('date')) {
             if ($request->date === 'Plus récente') {
                 $query->orderBy('created_at', 'desc');
             } elseif ($request->date === 'Plus ancienne') {
@@ -45,6 +45,9 @@ class UserController extends Controller
         } else {
             $query->orderBy('created_at', 'desc'); // Tri par défaut
         }
+        
+        // Retirez cette ligne après avoir vérifié que ça fonctionne
+        // dd($query->toSql(), $query->getBindings(), $request->all());
         
         $users = $query->paginate(10);
         
@@ -56,7 +59,7 @@ class UserController extends Controller
      */
     public function create()
     {
-        //
+        return view('admin.user.create');
     }
 
     /**
@@ -64,7 +67,24 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'role' => 'required|in:etudiant,administrateur',
+            'is_active' => 'required|boolean',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+        
+        $user = new User();
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->role = $request->role;
+        $user->is_active = $request->is_active;
+        $user->password = bcrypt($request->password);
+        $user->save();
+        
+        return redirect()->route('admin.users.index')
+            ->with('success', 'Utilisateur créé avec succès');
     }
 
     /**
@@ -89,7 +109,29 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $user = User::findOrFail($id);
+        
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,'.$id,
+            'role' => 'required|in:etudiant,administrateur',
+            'is_active' => 'required|boolean',
+            'password' => 'nullable|string|min:8|confirmed',
+        ]);
+        
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->role = $request->role;
+        $user->is_active = $request->is_active;
+        
+        if ($request->filled('password')) {
+            $user->password = bcrypt($request->password);
+        }
+        
+        $user->save();
+        
+        return redirect()->route('admin.users.index')
+            ->with('success', 'Utilisateur mis à jour avec succès');
     }
 
     /**
@@ -97,6 +139,17 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $user = User::findOrFail($id);
+        
+        // Empêcher la suppression de son propre compte
+        if (auth()->id() == $id) {
+            return redirect()->route('admin.users.index')
+                ->with('error', 'Vous ne pouvez pas supprimer votre propre compte.');
+        }
+        
+        $user->delete();
+        
+        return redirect()->route('admin.users.index')
+            ->with('success', 'Utilisateur supprimé avec succès.');
     }
 }
