@@ -8,11 +8,12 @@
         use Illuminate\Support\Facades\DB;
         use Illuminate\Support\Facades\Log;
         use Illuminate\Support\Facades\Redirect;
-        use Illuminate\Support\Facades\Http; // Importe le client HTTP de Laravel
-        use Illuminate\Http\Client\ConnectionException; // Pour attraper les erreurs de connexion
+        use Illuminate\Support\Facades\Http;
+        use Illuminate\Http\Client\ConnectionException;
         use App\Models\Quiz;
         use App\Models\Question;
-        use \JsonException; // Correct import for JsonException
+        use App\Models\Flashcard; // Ajout de l'import manquant
+        use \JsonException;
         use App\Http\Controllers\QuizController;
         use App\Services\AIService;
         
@@ -311,42 +312,66 @@
                 }
             }
 
-// ... (generateFlashcards - à adapter de manière similaire - et autres méthodes) ...
-
-
             /**
-             * Déclenche la génération de Flashcards par IA pour une note spécifique.
-             */
-            public function generateFlashcards(Note $note)
+ * Déclenche la génération de Flashcards par IA pour une note spécifique.
+ */
+            public function generateFlashcards(Request $request, Note $note)
             {
-                // 1. Vérification simple : l'utilisateur connecté est-il propriétaire de la note ?
+                // Valider les données
+                $request->validate([
+                    'num_flashcards' => 'required|integer|min:1|max:20',
+                ]);
+            
+                // Vérifications
                 if ($note->user_id !== auth()->id()) {
                     abort(403, 'Action non autorisée.');
-                    // Gate::authorize('update', $note);
                 }
-
-                // 2. Vérifier si la note a du contenu
+            
                 if (empty($note->content)) {
-                    return Redirect::route('notes.show', $note)
+                    return redirect()->route('notes.show', $note)
                                 ->with('error', 'Impossible de générer des flashcards : la note est vide.');
                 }
-
+            
                 $noteContent = $note->content;
-                // Instruction T5 pour générer des paires recto/verso
-                $instruction = "Extrait 5 concepts ou faits clés du texte suivant et génère des flashcards (paires recto/verso) pour chacun. Formatte le résultat en JSON de cette manière : {\"flashcard_title\": \"Titre du Jeu\", \"cards\": [{\"front\": \"Recto1\", \"back\": \"Verso1\"}, {\"front\": \"Recto2\", \"back\": \"Verso2\"}, ...]} : ";
-
-                // --- Appel à l'API Flask (Prochaine étape !) ---
-                // $response = Http::timeout(120)->post('http://127.0.0.1:5001/generate', [
-                //     'instruction' => $instruction,
-                //     'text' => $noteContent,
-                // ]);
-                // ... gestion de la réponse ...
-                // ---
-
-                // 3. Redirection temporaire en attendant l'appel API
-                return Redirect::route('notes.show', $note)
-                        ->with('status', 'Flashcards IA : Connexion au service IA et traitement en cours...');
+                $numFlashcards = $request->input('num_flashcards', 5);
+                
+                try {
+                    // Utiliser le service AI pour générer les flashcards
+                    $aiService = new AIService();
+                    $flashcardsData = $aiService->generateFlashcards($noteContent, $numFlashcards);
+                    
+                    // Créer les flashcards individuelles
+                    $createdFlashcards = [];
+                    foreach ($flashcardsData['cards'] as $index => $cardData) {
+                        $flashcard = new Flashcard();
+                        $flashcard->title = 'Flashcard ' . ($index + 1) . ' - ' . $note->title;
+                        $flashcard->description = 'Générée automatiquement à partir de la note: ' . $note->title;
+                        $flashcard->note_id = $note->id;
+                        $flashcard->user_id = auth()->id();
+                        $flashcard->front = $cardData['front'];
+                        $flashcard->back = $cardData['back'];
+                        $flashcard->visibilite = 'privee';
+                        $flashcard->status = 'new';
+                        $flashcard->save();
+                        
+                        $createdFlashcards[] = $flashcard->id;
+                    }
+                    
+                    return redirect()->route('flashcards.index', ['generated' => implode(',', $createdFlashcards)])
+                        ->with('success', $numFlashcards . ' flashcards générées avec succès!');
+                        
+                } catch (\Exception $e) {
+                    Log::error('Erreur lors de la génération des flashcards', [
+                        'error' => $e->getMessage(),
+                        'note_id' => $note->id
+                    ]);
+                    return back()->with('error', 'Erreur lors de la génération des flashcards: ' . $e->getMessage());
+                }
             }
+            
+            // Assurez-vous que cette accolade fermante est présente
+            
+            // Assurez-vous qu'il n'y a pas d'accolades supplémentaires à la fin du fichier
         }
                 // <!-- ```
 

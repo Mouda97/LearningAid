@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\NoteController;
@@ -30,9 +31,15 @@ Route::get('/dashboard_user', function () {
     return view('etudiant/dashboard_user'); // interface d'acceuil de  l'étudiant
 })->middleware('auth')->name('dashboard_user');
 
+// Remplacer cette ligne
 Route::get('/dashboardAdmin', function () {
     return view('admin/dashboardAdmin'); // Tableau de bord admin
 })->middleware('auth');
+
+// Par celle-ci
+Route::get('/dashboardAdmin', [App\Http\Controllers\Admin\DashboardController::class, 'index'])
+    ->middleware('auth')
+    ->name('admin.dashboard');
 
 // routes pour la gestion des notes
 Route::middleware(['auth'])->group(function () {
@@ -95,9 +102,37 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/notes/{note}/generate-flashcards', [NoteController::class, 'generateFlashcards'])
           ->name('notes.ai.generate.flashcards');
+
+     // Dans le groupe de routes middleware(['auth'])
+Route::post('/quizzes/{quiz}/submit', [QuizController::class, 'submitQuiz'])->name('quizzes.submit');
+// Routes pour les flashcards
+Route::get('/flashcards', [FlashcardController::class, 'index'])->name('flashcards.index');
+Route::get('/flashcards/{flashcard}', [FlashcardController::class, 'show'])->name('flashcards.show');
+Route::post('/notes/{note}/ai/generate/flashcards', [NoteController::class, 'generateFlashcards'])->name('notes.ai.generate.flashcards');    
+
+Route::get('/gestion', [UserController::class, 'index'])->name('gestion.index');
 });
 
-// Dans le groupe de routes middleware(['auth'])
-Route::post('/quizzes/{quiz}/submit', [QuizController::class, 'submitQuiz'])->name('quizzes.submit');
+// Routes pour la gestion des utilisateurs
+Route::middleware(['auth'])->prefix('admin')->group(function () {
+    // Liste des utilisateurs
+    Route::get('/users', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('admin.users.index');
+    
+    // Création d'un nouvel utilisateur
+    Route::get('/users/create', [App\Http\Controllers\Admin\UserController::class, 'create'])->name('admin.users.create');
+    Route::post('/users', [App\Http\Controllers\Admin\UserController::class, 'store'])->name('admin.users.store');
+    
+    // Édition d'un utilisateur
+    Route::get('/users/{user}/edit', [App\Http\Controllers\Admin\UserController::class, 'edit'])->name('admin.users.edit');
+    Route::put('/users/{user}', [App\Http\Controllers\Admin\UserController::class, 'update'])->name('admin.users.update');
+    
+    // Suppression d'un utilisateur
+    Route::delete('/users/{user}', [App\Http\Controllers\Admin\UserController::class, 'destroy'])->name('admin.users.destroy');
+    
+    // Modification du statut d'un utilisateur
+    Route::patch('/users/{user}/status', [App\Http\Controllers\Admin\UserController::class, 'updateStatus'])->name('admin.users.status');
+});
+
+
 
 

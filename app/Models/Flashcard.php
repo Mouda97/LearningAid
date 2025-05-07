@@ -3,7 +3,6 @@
 namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Flashcard extends Model
@@ -15,10 +14,14 @@ class Flashcard extends Model
         'description',
         'note_id',
         'user_id',
+        'front',
+        'back',
+        'status',
+        'visibilite'
     ];
 
     /**
-     * Get the user that owns this flashcard set.
+     * Get the user that owns this flashcard.
      */
     public function user(): BelongsTo
     {
@@ -26,19 +29,11 @@ class Flashcard extends Model
     }
 
     /**
-     * Get the note associated with this flashcard set.
+     * Get the note associated with this flashcard.
      */
     public function note(): BelongsTo
     {
         return $this->belongsTo(Note::class);
-    }
-
-    /**
-     * Get the cards for this flashcard set.
-     */
-    public function cards(): HasMany
-    {
-        return $this->hasMany(Card::class);
     }
 }
 

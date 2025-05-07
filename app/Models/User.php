@@ -74,6 +74,9 @@ class User extends Authenticatable
     /**
      * Define the relationship with flashcards
      */
+    /**
+     * Get the flashcards for the user.
+     */
     public function flashcards()
     {
         return $this->hasMany(Flashcard::class);
