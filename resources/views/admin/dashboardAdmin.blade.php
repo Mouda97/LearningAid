@@ -231,7 +231,7 @@
                                 <span class="text-slate-700">{{ $user->created_at->format('d M Y') }}</span>
                             </div>
                             <div class="col-span-2">
-                                <span class="px-3 py-1 rounded-full text-xs {{ $user->role == 'administrateur' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600' }}">
+                                <span class="px-3 py-1 rounded-full text-xs {{ $user->role == 'administrateurp' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600' }}">
                                     {{ $user->role == 'administrateur' ? 'Admin' : 'Étudiant' }}
                                 </span>
                             </div>

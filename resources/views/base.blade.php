@@ -6,6 +6,52 @@
     <title>LearningAid</title>
     {{-- <script src="https://cdn.tailwindcss.com"></script> --}}
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <style>
+        @media (max-width: 768px) {
+            .container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            
+            header .container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            header nav {
+                margin: 1rem 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            header nav a {
+                margin: 0.5rem 0;
+            }
+            
+            header .container > div {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                margin-top: 1rem;
+            }
+            
+            header .container > div a {
+                margin: 0.5rem 0;
+            }
+            
+            footer .grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            @media (min-width: 640px) {
+                footer .grid {
+                    grid-template-columns: 1fr 1fr;
+                }
+            }
+        }
+    </style>
 </head>
 <body>
 <header class="bg-white py-4 px-25  shadow-md">

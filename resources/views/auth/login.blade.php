@@ -11,6 +11,7 @@
     <div class="bg-black rounded-lg shadow-xl overflow-hidden flex md:max-w-2xl">
         <div class="bg-[#3E81B3] text-white p-8 md:w-1/2 flex flex-col justify-center items-start">
             <h2 class="text-3xl font-bold mb-4">Bienvenue</h2>
+            <img src="{{ asset("assets/img/logo manuella.png")}}" class="h-15" alt="Logo" >
             <p class="text-lg">Débloque ton succès universitaire : les cours dont tu as besoin, quand tu en as besoin.</p>
         </div>
         <div class="bg-black text-white p-8 md:w-1/2">
